@@ -1,0 +1,429 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghostra Visual - Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ghostra: {
+              dark: '#0b0f19',
+              panel: 'rgba(15, 23, 42, 0.75)',
+              card: 'rgba(30, 41, 59, 0.45)',
+              purple: '#a855f7',
+              purpleGlow: 'rgba(168, 85, 247, 0.4)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+    }
+    
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .glass-card {
+      background: rgba(30, 41, 59, 0.4);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass-card:hover {
+      background: rgba(30, 41, 59, 0.55);
+      border-color: rgba(168, 85, 247, 0.25);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    
+    .purple-glow-active {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    .custom-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+    }
+    
+    .custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #a855f7;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      transition: transform 0.1s;
+    }
+    
+    .custom-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+    
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #a855f7;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #a855f7;
+    }
+    
+    .window-shadow {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    .glow-text {
+      text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    }
+    
+    input[type="text"], input[type="number"] {
+      transition: all 0.2s;
+    }
+    
+    input[type="text"]:focus, input[type="number"]:focus {
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(168, 85, 247, 0.3);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(168, 85, 247, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-black flex items-center justify-center min-h-screen overflow-hidden">
+
+  <!-- Main Window Container -->
+  <div class="relative w-[850px] h-[550px] glass-panel rounded-2xl window-shadow overflow-hidden flex flex-col">
+    
+    <!-- Top Bar -->
+    <div class="h-14 glass-panel border-b border-white/5 flex items-center justify-between px-6 shrink-0 z-20">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span class="font-bold text-slate-100 tracking-wide text-sm">Ghostra Visual</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button class="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition-colors text-slate-400 hover:text-slate-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+        </button>
+        <button class="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition-colors text-slate-400 hover:text-slate-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        </button>
+        <button class="w-8 h-8 rounded-lg hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-colors text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+      
+      <!-- Sidebar -->
+      <div class="w-52 glass-panel border-r border-white/5 flex flex-col p-4 gap-1 shrink-0">
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-3 mt-2">Settings</div>
+        
+        <button onclick="switchTab('general')" id="tab-general" class="w-full text-left px-4 py-3 rounded-xl transition-all duration-300 purple-glow-active text-purple-200 font-semibold flex items-center gap-3 text-sm group">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          General
+        </button>
+        
+        <button onclick="switchTab('interface')" id="tab-interface" class="w-full text-left px-4 py-3 rounded-xl transition-all duration-300 hover:bg-white/5 text-slate-400 hover:text-slate-200 font-medium flex items-center gap-3 text-sm group">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+          </svg>
+          Interface
+        </button>
+      </div>
+
+      <!-- Content Area -->
+      <div class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-gradient-to-br from-slate-900/50 to-slate-800/30">
+        
+        <!-- General Tab -->
+        <div id="content-general" class="space-y-4 max-w-xl">
+          
+          <!-- Client Files -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+              Client Files
+            </h3>
+            <div class="flex gap-2">
+              <div class="flex-1 relative group">
+                <input type="text" value="C:/GhostraVisual" readonly 
+                  class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-300 font-mono focus:outline-none focus:border-purple-500/50 transition-colors group-hover:border-white/20">
+              </div>
+              <button class="p-2.5 rounded-xl bg-slate-800/50 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-slate-400 hover:text-purple-400 transition-all duration-200 active:scale-95" title="Refresh">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+              </button>
+              <button class="p-2.5 rounded-xl bg-slate-800/50 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-slate-400 hover:text-purple-400 transition-all duration-200 active:scale-95" title="Open Folder">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                </svg>
+              </button>
+              <button class="p-2.5 rounded-xl bg-slate-800/50 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-slate-400 hover:text-purple-400 transition-all duration-200 active:scale-95" title="Edit">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nickname -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+              Minecraft Nickname
+            </h3>
+            <input type="text" placeholder="Enter your nickname..." 
+              class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-purple-500/50 placeholder-slate-600">
+          </div>
+
+          <!-- RAM Allocation -->
+          <div class="glass-card rounded-2xl p-5">
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+                RAM Allocation
+              </h3>
+              <span id="ram-display" class="px-3 py-1 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold font-mono shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                2048 MB
+              </span>
+            </div>
+            <input type="range" min="512" max="8192" step="256" value="2048" 
+              class="custom-slider mb-2" 
+              oninput="updateRam(this.value)">
+            <div class="flex justify-between mt-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+              <span>512 MB</span>
+              <span>8192 MB</span>
+            </div>
+          </div>
+
+          <!-- Game Window -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+              Game Window
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs text-slate-500 font-medium ml-1">Width</label>
+                <input type="number" value="1280" 
+                  class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-purple-500/50 font-mono">
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs text-slate-500 font-medium ml-1">Height</label>
+                <input type="number" value="720" 
+                  class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-purple-500/50 font-mono">
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Toggles -->
+          <div class="glass-card rounded-2xl p-5 space-y-5">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+              Other
+            </h3>
+            
+            <label class="flex items-center justify-between cursor-pointer group">
+              <div>
+                <div class="text-sm font-semibold text-slate-200 group-hover:text-purple-200 transition-colors">Fullscreen mode</div>
+                <div class="text-xs text-slate-500 mt-0.5">Launch game in fullscreen</div>
+              </div>
+              <input type="checkbox" class="peer sr-only">
+              <div class="w-12 h-7 bg-slate-800 rounded-full border border-white/10 peer-checked:bg-purple-600 peer-checked:border-purple-500 transition-all duration-300 relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-5 after:h-5 after:rounded-full after:transition-all after:duration-300 peer-checked:after:translate-x-5 peer-checked:after:bg-white shadow-inner"></div>
+            </label>
+
+            <div class="h-px bg-white/5"></div>
+
+            <label class="flex items-center justify-between cursor-pointer group">
+              <div>
+                <div class="text-sm font-semibold text-slate-200 group-hover:text-purple-200 transition-colors">Reinstall client</div>
+                <div class="text-xs text-slate-500 mt-0.5">Force reinstall on next launch</div>
+              </div>
+              <input type="checkbox" class="peer sr-only">
+              <div class="w-12 h-7 bg-slate-800 rounded-full border border-white/10 peer-checked:bg-purple-600 peer-checked:border-purple-500 transition-all duration-300 relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-5 after:h-5 after:rounded-full after:transition-all after:duration-300 peer-checked:after:translate-x-5 peer-checked:after:bg-white shadow-inner"></div>
+            </label>
+
+            <div class="h-px bg-white/5"></div>
+
+            <label class="flex items-center justify-between cursor-pointer group">
+              <div>
+                <div class="text-sm font-semibold text-slate-200 group-hover:text-purple-200 transition-colors">Debug mode</div>
+                <div class="text-xs text-slate-500 mt-0.5">Enable console output</div>
+              </div>
+              <input type="checkbox" class="peer sr-only">
+              <div class="w-12 h-7 bg-slate-800 rounded-full border border-white/10 peer-checked:bg-purple-600 peer-checked:border-purple-500 transition-all duration-300 relative after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:w-5 after:h-5 after:rounded-full after:transition-all after:duration-300 peer-checked:after:translate-x-5 peer-checked:after:bg-white shadow-inner"></div>
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Interface Tab -->
+        <div id="content-interface" class="space-y-4 max-w-xl hidden">
+          
+          <!-- Theme Selector -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+              Theme
+            </h3>
+            <div class="bg-slate-950/50 p-1.5 rounded-xl border border-white/10 inline-flex w-full max-w-xs">
+              <button onclick="setTheme('dark')" id="btn-dark" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 bg-purple-600 text-white shadow-lg shadow-purple-500/25">
+                Dark
+              </button>
+              <button onclick="setTheme('light')" id="btn-light" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-slate-200">
+                Light
+              </button>
+            </div>
+          </div>
+
+          <!-- Language Selector -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
+              Language
+            </h3>
+            <div class="grid grid-cols-4 gap-3">
+              
+              <button onclick="selectLang('ru')" id="btn-lang-ru" class="relative flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 bg-slate-950/30 hover:bg-purple-500/5 hover:border-purple-500/30 transition-all duration-200 group">
+                <span class="text-3xl filter drop-shadow-lg group-hover:scale-110 transition-transform">🇷🇺</span>
+                <span class="text-xs font-bold text-slate-500 group-hover:text-slate-300 transition-colors">RU</span>
+                <div id="indicator-ru" class="absolute inset-0 rounded-xl border-2 border-purple-500 opacity-0 transition-opacity duration-200 shadow-[0_0_15px_rgba(168,85,247,0.3)]"></div>
+              </button>
+
+              <button onclick="selectLang('en')" id="btn-lang-en" class="relative flex flex-col items-center gap-2 p-4 rounded-xl border border-purple-500 bg-purple-500/10 transition-all duration-200 group shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+                <span class="text-3xl filter drop-shadow-lg scale-110 transition-transform">🇬🇧</span>
+                <span class="text-xs font-bold text-slate-200 transition-colors">EN</span>
+                <div id="indicator-en" class="absolute inset-0 rounded-xl border-2 border-purple-500 opacity-100 transition-opacity duration-200 shadow-[0_0_15px_rgba(168,85,247,0.4)]"></div>
+              </button>
+
+              <button onclick="selectLang('pl')" id="btn-lang-pl" class="relative flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 bg-slate-950/30 hover:bg-purple-500/5 hover:border-purple-500/30 transition-all duration-200 group">
+                <span class="text-3xl filter drop-shadow-lg group-hover:scale-110 transition-transform">🇵🇱</span>
+                <span class="text-xs font-bold text-slate-500 group-hover:text-slate-300 transition-colors">PL</span>
+                <div id="indicator-pl" class="absolute inset-0 rounded-xl border-2 border-purple-500 opacity-0 transition-opacity duration-200 shadow-[0_0_15px_rgba(168,85,247,0.3)]"></div>
+              </button>
+
+              <button onclick="selectLang('uk')" id="btn-lang-uk" class="relative flex flex-col items-center gap-2 p-4 rounded-xl border border-white/10 bg-slate-950/30 hover:bg-purple-500/5 hover:border-purple-500/30 transition-all duration-200 group">
+                <span class="text-3xl filter drop-shadow-lg group-hover:scale-110 transition-transform">🇺🇦</span>
+                <span class="text-xs font-bold text-slate-500 group-hover:text-slate-300 transition-colors">UK</span>
+                <div id="indicator-uk" class="absolute inset-0 rounded-xl border-2 border-purple-500 opacity-0 transition-opacity duration-200 shadow-[0_0_15px_rgba(168,85,247,0.3)]"></div>
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentTab = 'general';
+    let currentLang = 'en';
+    let currentTheme = 'dark';
+
+    function switchTab(tab) {
+      if (tab === currentTab) return;
+      
+      // Hide current
+      document.getElementById('content-' + currentTab).classList.add('hidden');
+      document.getElementById('tab-' + currentTab).classList.remove('purple-glow-active', 'text-purple-200', 'font-semibold');
+      document.getElementById('tab-' + currentTab).classList.add('text-slate-400', 'hover:bg-white/5', 'font-medium');
+      
+      // Show new
+      currentTab = tab;
+      document.getElementById('content-' + currentTab).classList.remove('hidden');
+      document.getElementById('tab-' + currentTab).classList.add('purple-glow-active', 'text-purple-200', 'font-semibold');
+      document.getElementById('tab-' + currentTab).classList.remove('text-slate-400', 'hover:bg-white/5', 'font-medium');
+    }
+
+    function updateRam(value) {
+      document.getElementById('ram-display').textContent = value + ' MB';
+    }
+
+    function setTheme(theme) {
+      const darkBtn = document.getElementById('btn-dark');
+      const lightBtn = document.getElementById('btn-light');
+      
+      if (theme === 'dark') {
+        darkBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 bg-purple-600 text-white shadow-lg shadow-purple-500/25';
+        lightBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-slate-200';
+      } else {
+        lightBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 bg-purple-600 text-white shadow-lg shadow-purple-500/25';
+        darkBtn.className = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 text-slate-400 hover:text-slate-200';
+      }
+      currentTheme = theme;
+    }
+
+    function selectLang(lang) {
+      if (lang === currentLang) return;
+      
+      // Reset current
+      const currentBtn = document.getElementById('btn-lang-' + currentLang);
+      const currentIndicator = document.getElementById('indicator-' + currentLang);
+      currentBtn.classList.remove('border-purple-500', 'bg-purple-500/10', 'shadow-[0_0_20px_rgba(168,85,247,0.15)]');
+      currentBtn.classList.add('border-white/10', 'bg-slate-950/30');
+      currentIndicator.classList.remove('opacity-100');
+      currentIndicator.classList.add('opacity-0');
+      currentBtn.querySelector('span:first-child').classList.remove('scale-110');
+      currentBtn.querySelector('span:last-child').classList.remove('text-slate-200');
+      currentBtn.querySelector('span:last-child').classList.add('text-slate-500', 'group-hover:text-slate-300');
+      
+      // Set new
+      currentLang = lang;
+      const newBtn = document.getElementById('btn-lang-' + lang);
+      const newIndicator = document.getElementById('indicator-' + lang);
+      newBtn.classList.remove('border-white/10', 'bg-slate-950/30');
+      newBtn.classList.add('border-purple-500', 'bg-purple-500/10', 'shadow-[0_0_20px_rgba(168,85,247,0.15)]');
+      newIndicator.classList.remove('opacity-0');
+      newIndicator.classList.add('opacity-100');
+      newBtn.querySelector('span:first-child').classList.add('scale-110');
+      newBtn.querySelector('span:last-child').classList.remove('text-slate-500', 'group-hover:text-slate-300');
+      newBtn.querySelector('span:last-child').classList.add('text-slate-200');
+    }
+  </script>
+
+</body>
+</html>

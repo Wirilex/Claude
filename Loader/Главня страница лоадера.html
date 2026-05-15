@@ -1,0 +1,1326 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghostra Visual — Launcher</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+          colors: {
+            ghostra: {
+              bg: '#0a0e1a',
+              panel: '#141824',
+              panel2: '#1a1f2e',
+              border: 'rgba(139,92,246,0.12)',
+              borderHover: 'rgba(139,92,246,0.25)',
+              purple: '#8b5cf6',
+              purple2: '#7c3aed',
+              purple3: '#a78bfa',
+              purpleGlow: 'rgba(139,92,246,0.35)',
+              text: '#e2e8f0',
+              text2: '#94a3b8',
+              text3: '#64748b',
+              error: '#ef4444',
+              success: '#22c55e',
+              warning: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      width:100%; height:100%;
+      background:#05070d;
+      font-family:'Inter',system-ui,sans-serif;
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* ── Launcher shell ── */
+    #launcher {
+      width:850px; height:550px;
+      position:relative;
+      border-radius:16px;
+      overflow:hidden;
+      background: linear-gradient(145deg, #0a0e1a 0%, #141824 50%, #0d111c 100%);
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,0.08),
+        0 8px 40px rgba(0,0,0,0.6),
+        0 0 80px rgba(139,92,246,0.06);
+    }
+
+    /* ── Animated violet orbs ── */
+    .orb {
+      position:absolute; border-radius:50%; filter:blur(60px); pointer-events:none; opacity:0.35;
+    }
+    .orb-1 { width:280px; height:280px; background:#7c3aed; top:-60px; right:-40px; animation:orbFloat1 10s ease-in-out infinite; }
+    .orb-2 { width:200px; height:200px; background:#8b5cf6; bottom:-40px; left:80px; animation:orbFloat2 12s ease-in-out infinite; }
+    .orb-3 { width:160px; height:160px; background:#a78bfa; top:40%; left:45%; animation:orbFloat3 14s ease-in-out infinite; opacity:0.2; }
+    @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,30px)} }
+    @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(25px,-20px)} }
+    @keyframes orbFloat3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-15px,15px) scale(1.1)} }
+
+    /* ── Glass ── */
+    .glass {
+      background:rgba(20,24,36,0.55);
+      backdrop-filter:blur(24px) saturate(1.4);
+      -webkit-backdrop-filter:blur(24px) saturate(1.4);
+      border:1px solid rgba(139,92,246,0.10);
+    }
+    .glass-strong {
+      background:rgba(20,24,36,0.75);
+      backdrop-filter:blur(32px) saturate(1.6);
+      -webkit-backdrop-filter:blur(32px) saturate(1.6);
+      border:1px solid rgba(139,92,246,0.14);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(139,92,246,0.3); border-radius:10px; }
+    ::-webkit-scrollbar-thumb:hover { background:rgba(139,92,246,0.5); }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width:80px; height:100%;
+      display:flex; flex-direction:column; align-items:center;
+      padding:16px 0; gap:4px;
+      border-right:1px solid rgba(139,92,246,0.08);
+      background:rgba(10,14,26,0.7);
+      backdrop-filter:blur(20px);
+      z-index:10;
+    }
+    .nav-item {
+      width:52px; height:52px;
+      display:flex; align-items:center; justify-content:center;
+      border-radius:14px;
+      color:#64748b;
+      cursor:pointer;
+      transition:all 0.28s cubic-bezier(0.4,0,0.2,1);
+      position:relative;
+    }
+    .nav-item:hover {
+      color:#a78bfa;
+      background:rgba(139,92,246,0.08);
+    }
+    .nav-item.active {
+      color:#8b5cf6;
+      background:rgba(139,92,246,0.12);
+      box-shadow:0 0 20px rgba(139,92,246,0.1), inset 0 1px 0 rgba(139,92,246,0.1);
+    }
+    .nav-item.active::before {
+      content:''; position:absolute; left:-16px; top:50%; transform:translateY(-50%);
+      width:3px; height:20px; background:#8b5cf6; border-radius:0 3px 3px 0;
+    }
+    .nav-tooltip {
+      position:absolute; left:64px; top:50%; transform:translateY(-50%) translateX(-6px);
+      background:rgba(20,24,36,0.95); color:#e2e8f0; font-size:11px; font-weight:500;
+      padding:5px 10px; border-radius:8px; white-space:nowrap; pointer-events:none;
+      opacity:0; transition:all 0.2s ease;
+      border:1px solid rgba(139,92,246,0.15);
+      box-shadow:0 4px 16px rgba(0,0,0,0.4);
+    }
+    .nav-item:hover .nav-tooltip { opacity:1; transform:translateY(-50%) translateX(0); }
+
+    /* ── Top bar ── */
+    .topbar {
+      height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 24px;
+      border-bottom:1px solid rgba(139,92,246,0.06);
+    }
+
+    /* ── Inputs ── */
+    .input-glass {
+      width:100%; height:44px;
+      background:rgba(20,24,36,0.6);
+      border:1px solid rgba(139,92,246,0.12);
+      border-radius:12px;
+      padding:0 14px 0 40px;
+      color:#e2e8f0; font-size:13px; font-weight:400;
+      transition:all 0.25s ease;
+      outline:none;
+    }
+    .input-glass::placeholder { color:#475569; }
+    .input-glass:hover { border-color:rgba(139,92,246,0.2); }
+    .input-glass:focus {
+      border-color:rgba(139,92,246,0.45);
+      box-shadow:0 0 0 3px rgba(139,92,246,0.08), 0 0 20px rgba(139,92,246,0.06);
+      background:rgba(20,24,36,0.8);
+    }
+    .input-glass.error {
+      border-color:rgba(239,68,68,0.5);
+      box-shadow:0 0 0 3px rgba(239,68,68,0.08);
+    }
+    .input-glass.success {
+      border-color:rgba(34,197,94,0.5);
+      box-shadow:0 0 0 3px rgba(34,197,94,0.08);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      height:44px;
+      background:linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+      border:none; border-radius:12px;
+      color:#fff; font-size:13px; font-weight:600;
+      cursor:pointer;
+      position:relative; overflow:hidden;
+      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 4px 20px rgba(139,92,246,0.25), 0 0 40px rgba(139,92,246,0.1);
+    }
+    .btn-primary::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+      opacity:0; transition:opacity 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform:translateY(-1px);
+      box-shadow:0 6px 28px rgba(139,92,246,0.35), 0 0 60px rgba(139,92,246,0.15);
+    }
+    .btn-primary:hover::before { opacity:1; }
+    .btn-primary:active { transform:translateY(0) scale(0.98); }
+    .btn-primary:disabled {
+      opacity:0.4; cursor:not-allowed; transform:none;
+      box-shadow:0 2px 8px rgba(139,92,246,0.1);
+    }
+    .btn-primary.loading { pointer-events:none; }
+    .btn-primary.loading::after {
+      content:''; position:absolute; width:16px; height:16px;
+      border:2px solid rgba(255,255,255,0.2); border-top-color:#fff;
+      border-radius:50%; animation:spin 0.8s linear infinite;
+      top:50%; left:50%; margin:-8px 0 0 -8px;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    .btn-secondary {
+      height:40px;
+      background:rgba(139,92,246,0.08);
+      border:1px solid rgba(139,92,246,0.15);
+      border-radius:10px;
+      color:#a78bfa; font-size:12px; font-weight:500;
+      cursor:pointer;
+      transition:all 0.25s ease;
+    }
+    .btn-secondary:hover {
+      background:rgba(139,92,246,0.14);
+      border-color:rgba(139,92,246,0.3);
+      color:#c4b5fd;
+    }
+    .btn-secondary:active { transform:scale(0.97); }
+
+    .btn-danger {
+      height:40px;
+      background:rgba(239,68,68,0.08);
+      border:1px solid rgba(239,68,68,0.15);
+      border-radius:10px;
+      color:#f87171; font-size:12px; font-weight:500;
+      cursor:pointer;
+      transition:all 0.25s ease;
+    }
+    .btn-danger:hover {
+      background:rgba(239,68,68,0.14);
+      border-color:rgba(239,68,68,0.3);
+      color:#fca5a5;
+    }
+
+    /* ── Toggles ── */
+    .toggle {
+      width:42px; height:24px;
+      border-radius:12px;
+      background:rgba(100,116,139,0.25);
+      position:relative; cursor:pointer;
+      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+      flex-shrink:0;
+    }
+    .toggle.on { background:linear-gradient(135deg, #7c3aed, #8b5cf6); box-shadow:0 0 12px rgba(139,92,246,0.3); }
+    .toggle-knob {
+      width:18px; height:18px; border-radius:50%;
+      background:#fff; position:absolute; top:3px; left:3px;
+      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow:0 2px 6px rgba(0,0,0,0.25);
+    }
+    .toggle.on .toggle-knob { left:21px; }
+
+    /* ── Cards ── */
+    .card {
+      background:rgba(20,24,36,0.5);
+      border:1px solid rgba(139,92,246,0.08);
+      border-radius:14px;
+      transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .card:hover {
+      border-color:rgba(139,92,246,0.18);
+      box-shadow:0 4px 24px rgba(139,92,246,0.06);
+      transform:translateY(-1px);
+    }
+    .card-lift {
+      background:rgba(20,24,36,0.6);
+      border:1px solid rgba(139,92,246,0.1);
+      border-radius:16px;
+      transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .card-lift:hover {
+      transform:translateY(-3px);
+      border-color:rgba(139,92,246,0.22);
+      box-shadow:0 8px 32px rgba(139,92,246,0.1), 0 0 60px rgba(139,92,246,0.04);
+    }
+
+    /* ── Slider ── */
+    .slider-track {
+      width:100%; height:6px;
+      background:rgba(100,116,139,0.15);
+      border-radius:3px; position:relative; cursor:pointer;
+    }
+    .slider-fill {
+      height:100%; border-radius:3px;
+      background:linear-gradient(90deg, #7c3aed, #8b5cf6);
+      position:relative;
+      box-shadow:0 0 8px rgba(139,92,246,0.3);
+    }
+    .slider-thumb {
+      width:18px; height:18px; border-radius:50%;
+      background:#fff; position:absolute; right:-9px; top:-6px;
+      box-shadow:0 2px 8px rgba(139,92,246,0.4), 0 0 0 3px rgba(139,92,246,0.15);
+      cursor:grab; transition:box-shadow 0.2s ease;
+    }
+    .slider-thumb:hover { box-shadow:0 2px 12px rgba(139,92,246,0.5), 0 0 0 4px rgba(139,92,246,0.2); }
+    .slider-thumb:active { cursor:grabbing; }
+
+    /* ── Checkbox ── */
+    .cb {
+      width:18px; height:18px;
+      border:1.5px solid rgba(139,92,246,0.25);
+      border-radius:5px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all 0.2s ease; flex-shrink:0;
+    }
+    .cb:hover { border-color:rgba(139,92,246,0.5); }
+    .cb.checked {
+      background:linear-gradient(135deg, #7c3aed, #8b5cf6);
+      border-color:transparent;
+      box-shadow:0 0 8px rgba(139,92,246,0.3);
+    }
+
+    /* ── Dropdown ── */
+    .dropdown {
+      position:relative;
+    }
+    .dropdown-menu {
+      position:absolute; top:calc(100% + 6px); left:0; right:0;
+      background:rgba(20,24,36,0.95);
+      border:1px solid rgba(139,92,246,0.15);
+      border-radius:12px;
+      padding:6px;
+      opacity:0; visibility:hidden; transform:translateY(-6px);
+      transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+      z-index:50;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      backdrop-filter:blur(16px);
+    }
+    .dropdown.open .dropdown-menu { opacity:1; visibility:visible; transform:translateY(0); }
+    .dropdown-item {
+      padding:8px 12px; border-radius:8px;
+      font-size:12px; color:#94a3b8; cursor:pointer;
+      display:flex; align-items:center; gap:8px;
+      transition:all 0.15s ease;
+    }
+    .dropdown-item:hover { background:rgba(139,92,246,0.1); color:#e2e8f0; }
+    .dropdown-item.selected { color:#a78bfa; background:rgba(139,92,246,0.08); }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border:2px dashed rgba(139,92,246,0.15);
+      border-radius:14px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px;
+      transition:all 0.3s ease;
+      cursor:pointer;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color:rgba(139,92,246,0.4);
+      background:rgba(139,92,246,0.04);
+      box-shadow:0 0 30px rgba(139,92,246,0.06);
+    }
+
+    /* ── Page transitions ── */
+    .page {
+      position:absolute; inset:0;
+      opacity:0; visibility:hidden;
+      transition:opacity 0.35s cubic-bezier(0.4,0,0.2,1), visibility 0.35s;
+      display:flex;
+    }
+    .page.active { opacity:1; visibility:visible; }
+
+    /* ── Changelog ── */
+    .changelog-item {
+      position:relative; padding-left:20px;
+    }
+    .changelog-item::before {
+      content:''; position:absolute; left:0; top:6px;
+      width:7px; height:7px; border-radius:50%;
+      background:#8b5cf6;
+      box-shadow:0 0 8px rgba(139,92,246,0.4);
+    }
+    .changelog-item::after {
+      content:''; position:absolute; left:3px; top:17px; bottom:-8px;
+      width:1px; background:rgba(139,92,246,0.12);
+    }
+    .changelog-item:last-child::after { display:none; }
+
+    /* ── Tab pills ── */
+    .tab-pill {
+      padding:7px 16px; border-radius:10px;
+      font-size:12px; font-weight:500; color:#64748b;
+      cursor:pointer; transition:all 0.25s ease;
+      border:1px solid transparent;
+    }
+    .tab-pill:hover { color:#94a3b8; background:rgba(139,92,246,0.05); }
+    .tab-pill.active {
+      color:#e2e8f0;
+      background:rgba(139,92,246,0.12);
+      border-color:rgba(139,92,246,0.2);
+      box-shadow:0 0 16px rgba(139,92,246,0.08);
+    }
+
+    /* ── Design system states ── */
+    .state-normal {
+      background:rgba(20,24,36,0.6);
+      border:1px solid rgba(139,92,246,0.12);
+      color:#94a3b8;
+    }
+    .state-hover {
+      background:rgba(139,92,246,0.08);
+      border:1px solid rgba(139,92,246,0.25);
+      color:#a78bfa;
+      box-shadow:0 0 16px rgba(139,92,246,0.08);
+    }
+    .state-active {
+      background:rgba(139,92,246,0.15);
+      border:1px solid rgba(139,92,246,0.4);
+      color:#c4b5fd;
+      box-shadow:0 0 20px rgba(139,92,246,0.12), inset 0 1px 0 rgba(139,92,246,0.1);
+      transform:scale(0.97);
+    }
+    .state-focused {
+      background:rgba(20,24,36,0.7);
+      border:1px solid rgba(139,92,246,0.5);
+      color:#e2e8f0;
+      box-shadow:0 0 0 3px rgba(139,92,246,0.1), 0 0 24px rgba(139,92,246,0.1);
+    }
+    .state-disabled {
+      background:rgba(20,24,36,0.3);
+      border:1px solid rgba(100,116,139,0.1);
+      color:#475569;
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .state-loading {
+      background:rgba(139,92,246,0.08);
+      border:1px solid rgba(139,92,246,0.2);
+      color:#a78bfa;
+      position:relative; overflow:hidden;
+    }
+    .state-loading::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, transparent, #8b5cf6, transparent);
+      animation:loadBar 1.5s ease-in-out infinite;
+    }
+    @keyframes loadBar { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(12px) }
+      to { opacity:1; transform:translateY(0) }
+    }
+    .anim-in { animation:fadeInUp 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .anim-d1 { animation-delay:0.05s; opacity:0; }
+    .anim-d2 { animation-delay:0.1s; opacity:0; }
+    .anim-d3 { animation-delay:0.15s; opacity:0; }
+    .anim-d4 { animation-delay:0.2s; opacity:0; }
+    .anim-d5 { animation-delay:0.25s; opacity:0; }
+
+    /* ── Shimmer on login decorative panel ── */
+    @keyframes shimmer {
+      0% { background-position:-200% 0 }
+      100% { background-position:200% 0 }
+    }
+    .shimmer-text {
+      background:linear-gradient(90deg, #8b5cf6, #c4b5fd, #8b5cf6);
+      background-size:200% auto;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      animation:shimmer 4s linear infinite;
+    }
+
+    /* ── Stat card glow ── */
+    .stat-card {
+      background:rgba(20,24,36,0.5);
+      border:1px solid rgba(139,92,246,0.08);
+      border-radius:12px;
+      padding:14px;
+      transition:all 0.3s ease;
+    }
+    .stat-card:hover {
+      border-color:rgba(139,92,246,0.2);
+      box-shadow:0 4px 20px rgba(139,92,246,0.08);
+      transform:translateY(-2px);
+    }
+
+    /* ── Version screenshot placeholder ── */
+    .screenshot-placeholder {
+      background:linear-gradient(135deg, rgba(139,92,246,0.08), rgba(124,58,237,0.04));
+      border:1px dashed rgba(139,92,246,0.15);
+      border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* ── Locked overlay ── */
+    .locked-overlay {
+      position:absolute; inset:0;
+      background:rgba(10,14,26,0.7);
+      backdrop-filter:blur(3px);
+      border-radius:16px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px;
+      z-index:5;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position:fixed; bottom:20px; right:20px;
+      padding:12px 18px; border-radius:12px;
+      font-size:12px; font-weight:500;
+      color:#fff;
+      transform:translateY(20px); opacity:0;
+      transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
+      z-index:200;
+      backdrop-filter:blur(16px);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast-success { background:rgba(34,197,94,0.9); border:1px solid rgba(34,197,94,0.3); }
+    .toast-error { background:rgba(239,68,68,0.9); border:1px solid rgba(239,68,68,0.3); }
+    .toast-info { background:rgba(139,92,246,0.9); border:1px solid rgba(139,92,246,0.3); }
+
+    /* ── Ripple ── */
+    .ripple {
+      position:absolute; border-radius:50%;
+      background:rgba(255,255,255,0.2);
+      transform:scale(0);
+      animation:rippleAnim 0.6s ease-out;
+      pointer-events:none;
+    }
+    @keyframes rippleAnim { to { transform:scale(4); opacity:0 } }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;
+      color:#64748b;
+    }
+
+    /* ── Flag emoji sizing ── */
+    .flag { font-size:14px; line-height:1; }
+
+    /* ── Glow text utility ── */
+    .glow-purple { text-shadow:0 0 20px rgba(139,92,246,0.4), 0 0 40px rgba(139,92,246,0.15); }
+  </style>
+</head>
+<body>
+
+  <!-- Toast -->
+  <div id="toast" class="toast toast-info"></div>
+
+  <!-- Launcher -->
+  <div id="launcher">
+
+    <!-- Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div style="margin-bottom:8px;">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28">
+              <stop offset="0%" stop-color="#8b5cf6"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+          <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="url(#logoGrad)" stroke-width="1.8" fill="none"/>
+          <path d="M14 8l-6 3.5v7L14 22l6-3.5v-7L14 8z" fill="url(#logoGrad)" opacity="0.25"/>
+          <circle cx="14" cy="15" r="3" fill="url(#logoGrad)"/>
+        </svg>
+      </div>
+      <div style="width:28px; height:1px; background:rgba(139,92,246,0.12); margin:8px 0 12px;"></div>
+
+      <div class="nav-item" data-page="login" onclick="goPage('login')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span class="nav-tooltip">Login</span>
+      </div>
+      <div class="nav-item active" data-page="home" onclick="goPage('home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="nav-tooltip">Home</span>
+      </div>
+      <div class="nav-item" data-page="profile" onclick="goPage('profile')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-tooltip">Profile</span>
+      </div>
+      <div class="nav-item" data-page="settings" onclick="goPage('settings')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="nav-tooltip">Settings</span>
+      </div>
+
+      <div style="margin-top:auto;">
+        <div class="nav-item" onclick="showToast('Logged out','info'); goPage('login')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="nav-tooltip">Logout</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main area -->
+    <div style="flex:1; display:flex; flex-direction:column; position:relative; overflow:hidden;">
+
+      <!-- Top bar -->
+      <div class="topbar glass-strong">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span id="pageTitle" style="font-size:15px; font-weight:700; color:#e2e8f0; letter-spacing:-0.2px;">Home</span>
+          <div style="width:1px; height:16px; background:rgba(139,92,246,0.15);"></div>
+          <span style="font-size:11px; color:#475569; font-weight:500;">Ghostra Visual v2.4.1</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="display:flex; align-items:center; gap:6px; padding:5px 12px; background:rgba(139,92,246,0.06); border-radius:20px; border:1px solid rgba(139,92,246,0.08);">
+            <div style="width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px rgba(34,197,94,0.4);"></div>
+            <span style="font-size:11px; color:#64748b; font-weight:500;">Online</span>
+          </div>
+          <div style="width:30px; height:30px; border-radius:10px; background:linear-gradient(135deg, #7c3aed, #8b5cf6); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; box-shadow:0 2px 12px rgba(139,92,246,0.3);">A</div>
+        </div>
+      </div>
+
+      <!-- Content pages -->
+      <div style="flex:1; position:relative; overflow:hidden;">
+
+        <!-- ════════════════════════════════════════ LOGIN ════════════════════════════════════════ -->
+        <div id="page-login" class="page active">
+          <!-- Left: form -->
+          <div style="width:50%; padding:40px 36px; display:flex; flex-direction:column; justify-content:center; position:relative; z-index:2;">
+            <div class="anim-in">
+              <h1 style="font-size:26px; font-weight:800; color:#e2e8f0; letter-spacing:-0.5px; line-height:1.15;">
+                <span class="shimmer-text">Ghostra Visual</span>
+              </h1>
+              <p style="font-size:12px; color:#64748b; margin-top:6px; font-weight:400;">Визуальный лаунчер нового поколения</p>
+            </div>
+
+            <div class="anim-in anim-d2" style="margin-top:32px; display:flex; flex-direction:column; gap:16px;">
+              <!-- Username -->
+              <div style="position:relative;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); pointer-events:none;">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input type="text" class="input-glass" id="loginUser" placeholder="Username" value="AlexGhost" onkeydown="if(event.key==='Enter')doLogin()">
+              </div>
+              <!-- Password -->
+              <div style="position:relative;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); pointer-events:none;">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <input type="password" class="input-glass" id="loginPass" placeholder="Password" value="password123" onkeydown="if(event.key==='Enter')doLogin()">
+                <button onclick="togglePass()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; padding:4px;">
+                  <svg id="eyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+              <!-- Remember -->
+              <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleCheckbox(this)">
+                <div class="cb checked" id="loginRemember"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <span style="font-size:12px; color:#64748b; font-weight:400;">Remember me</span>
+              </div>
+              <!-- CTA -->
+              <button class="btn-primary" id="loginBtn" style="margin-top:4px;" onclick="doLogin()">
+                <span id="loginBtnText">Sign In</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: decorative -->
+          <div style="width:50%; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; overflow:hidden;">
+            <div style="position:absolute; inset:0; background:linear-gradient(145deg, rgba(124,58,237,0.06), transparent);"></div>
+            <!-- Central logo -->
+            <div class="anim-in anim-d3" style="position:relative; z-index:2; text-align:center;">
+              <div style="width:80px; height:80px; margin:0 auto 20px; border-radius:24px; background:linear-gradient(145deg, rgba(124,58,237,0.15), rgba(139,92,246,0.08)); border:1px solid rgba(139,92,246,0.15); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 40px rgba(139,92,246,0.15), 0 0 80px rgba(139,92,246,0.08);">
+                <svg width="36" height="36" viewBox="0 0 28 28" fill="none">
+                  <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="#8b5cf6" stroke-width="1.5" fill="none"/>
+                  <path d="M14 8l-6 3.5v7L14 22l6-3.5v-7L14 8z" fill="#8b5cf6" opacity="0.3"/>
+                  <circle cx="14" cy="15" r="3" fill="#8b5cf6"/>
+                </svg>
+              </div>
+              <h2 style="font-size:18px; font-weight:700; color:#e2e8f0;">Welcome back</h2>
+              <p style="font-size:12px; color:#64748b; margin-top:4px; max-width:200px; line-height:1.5;">Launch into Ghostra Visual and explore new worlds.</p>
+            </div>
+            <!-- Stat cards -->
+            <div class="anim-in anim-d4" style="display:flex; gap:10px; margin-top:28px; position:relative; z-index:2;">
+              <div class="stat-card" style="text-align:center; min-width:90px;">
+                <div style="font-size:20px; font-weight:800; color:#8b5cf6;">12K+</div>
+                <div style="font-size:10px; color:#475569; margin-top:2px; font-weight:500;">Players</div>
+              </div>
+              <div class="stat-card" style="text-align:center; min-width:90px;">
+                <div style="font-size:20px; font-weight:800; color:#a78bfa;">99.9%</div>
+                <div style="font-size:10px; color:#475569; margin-top:2px; font-weight:500;">Uptime</div>
+              </div>
+              <div class="stat-card" style="text-align:center; min-width:90px;">
+                <div style="font-size:20px; font-weight:800; color:#c4b5fd;">v2.4</div>
+                <div style="font-size:10px; color:#475569; margin-top:2px; font-weight:500;">Version</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════ HOME ════════════════════════════════════════ -->
+        <div id="page-home" class="page">
+          <div style="flex:1; display:flex; flex-direction:column; padding:20px 24px 16px; overflow-y:auto;">
+            <div class="anim-in" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+              <div>
+                <h2 style="font-size:16px; font-weight:700; color:#e2e8f0;">Versions</h2>
+                <p style="font-size:11px; color:#475569; margin-top:2px;">Select a version to launch</p>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <div class="tab-pill active">All</div>
+                <div class="tab-pill">Favorites</div>
+              </div>
+            </div>
+
+            <!-- Version cards -->
+            <div class="anim-in anim-d2" style="display:flex; gap:12px; margin-bottom:16px;">
+              <!-- Release -->
+              <div class="card-lift" style="flex:1; padding:16px; position:relative; overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                  <div style="width:32px; height:32px; border-radius:10px; background:linear-gradient(135deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05)); border:1px solid rgba(34,197,94,0.2); display:flex; align-items:center; justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div>
+                    <div style="font-size:13px; font-weight:700; color:#e2e8f0;">Release</div>
+                    <div style="font-size:10px; color:#64748b; font-weight:500;">v2.4.1 &middot; Stable</div>
+                  </div>
+                  <div style="margin-left:auto; padding:3px 10px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.15); border-radius:20px; font-size:10px; color:#22c55e; font-weight:600;">Latest</div>
+                </div>
+                <div class="screenshot-placeholder" style="height:90px; margin-bottom:12px;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(139,92,246,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
+                <button class="btn-primary" style="width:100%; height:38px; font-size:12px;" onclick="showToast('Launching Release v2.4.1...','success')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; vertical-align:-2px; margin-right:6px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Launch
+                </button>
+              </div>
+              <!-- Beta -->
+              <div class="card-lift" style="flex:1; padding:16px; position:relative; overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                  <div style="width:32px; height:32px; border-radius:10px; background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05)); border:1px solid rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  </div>
+                  <div>
+                    <div style="font-size:13px; font-weight:700; color:#e2e8f0;">Beta</div>
+                    <div style="font-size:10px; color:#64748b; font-weight:500;">v2.5.0-b3 &middot; Testing</div>
+                  </div>
+                </div>
+                <div class="screenshot-placeholder" style="height:90px; margin-bottom:12px;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(139,92,246,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
+                <button class="btn-primary" style="width:100%; height:38px; font-size:12px;" onclick="showToast('Launching Beta v2.5.0-b3...','info')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; vertical-align:-2px; margin-right:6px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Launch
+                </button>
+              </div>
+              <!-- Test (locked) -->
+              <div class="card-lift" style="flex:1; padding:16px; position:relative; overflow:hidden;">
+                <div class="locked-overlay">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <div style="font-size:12px; font-weight:600; color:#64748b;">Developer Only</div>
+                  <div style="font-size:10px; color:#475569;">Requires DEV role</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; opacity:0.3;">
+                  <div style="width:32px; height:32px; border-radius:10px; background:rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  </div>
+                  <div>
+                    <div style="font-size:13px; font-weight:700; color:#e2e8f0;">Test</div>
+                    <div style="font-size:10px; color:#64748b;">v2.5.0-dev &middot; Internal</div>
+                  </div>
+                </div>
+                <div class="screenshot-placeholder" style="height:90px; margin-bottom:12px; opacity:0.2;"></div>
+                <button disabled class="btn-primary" style="width:100%; height:38px; font-size:12px; opacity:0.3;">Locked</button>
+              </div>
+            </div>
+
+            <!-- Changelog -->
+            <div class="anim-in anim-d3" style="flex:1; min-height:0;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <h3 style="font-size:13px; font-weight:700; color:#e2e8f0;">Changelog</h3>
+                <span style="font-size:10px; color:#475569; font-weight:500;">Last 30 days</span>
+              </div>
+              <div class="card" style="padding:16px 18px; max-height:165px; overflow-y:auto;">
+                <div class="changelog-item" style="padding-bottom:14px;">
+                  <div style="font-size:11px; font-weight:600; color:#e2e8f0;">v2.4.1 — Hotfix</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:3px; line-height:1.5;">Fixed memory leak in render pipeline. Improved chunk loading performance by 18%.</div>
+                  <div style="font-size:10px; color:#475569; margin-top:4px; font-weight:500;">Dec 18, 2024</div>
+                </div>
+                <div class="changelog-item" style="padding-bottom:14px;">
+                  <div style="font-size:11px; font-weight:600; color:#e2e8f0;">v2.4.0 — Major Update</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:3px; line-height:1.5;">New shader system with ray-traced reflections. Added 6 new biomes. UI overhaul.</div>
+                  <div style="font-size:10px; color:#475569; margin-top:4px; font-weight:500;">Dec 10, 2024</div>
+                </div>
+                <div class="changelog-item" style="padding-bottom:14px;">
+                  <div style="font-size:11px; font-weight:600; color:#e2e8f0;">v2.3.2 — Patch</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:3px; line-height:1.5;">Security patches. Updated authentication flow. Discord RPC integration.</div>
+                  <div style="font-size:10px; color:#475569; margin-top:4px; font-weight:500;">Nov 28, 2024</div>
+                </div>
+                <div class="changelog-item" style="padding-bottom:14px;">
+                  <div style="font-size:11px; font-weight:600; color:#e2e8f0;">v2.3.0 — Feature Drop</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:3px; line-height:1.5;">Mod loader v3. Custom skin support. New launcher UI theme.</div>
+                  <div style="font-size:10px; color:#475569; margin-top:4px; font-weight:500;">Nov 15, 2024</div>
+                </div>
+                <div class="changelog-item">
+                  <div style="font-size:11px; font-weight:600; color:#e2e8f0;">v2.2.5 — Optimization</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:3px; line-height:1.5;">Reduced startup time by 40%. Background asset preloading.</div>
+                  <div style="font-size:10px; color:#475569; margin-top:4px; font-weight:500;">Oct 30, 2024</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════ PROFILE ════════════════════════════════════════ -->
+        <div id="page-profile" class="page">
+          <div style="flex:1; display:flex; flex-direction:column; padding:20px 24px 16px; overflow-y:auto;">
+            <div class="anim-in" style="margin-bottom:16px;">
+              <h2 style="font-size:16px; font-weight:700; color:#e2e8f0;">Profile</h2>
+              <p style="font-size:11px; color:#475569; margin-top:2px;">Manage your account and subscription</p>
+            </div>
+
+            <div style="display:flex; gap:16px; flex:1; min-height:0;">
+              <!-- Left: avatar + info -->
+              <div class="anim-in anim-d2" style="width:220px; flex-shrink:0;">
+                <div class="card" style="padding:20px; text-align:center;">
+                  <!-- Avatar upload -->
+                  <div class="upload-zone" style="width:96px; height:96px; margin:0 auto 14px; position:relative; overflow:hidden;" id="avatarZone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleAvatarDrop(event)" onclick="document.getElementById('avatarInput').click()">
+                    <input type="file" id="avatarInput" style="display:none" accept="image/*" onchange="handleAvatarSelect(event)">
+                    <div id="avatarPreview" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(139,92,246,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                  </div>
+                  <div style="font-size:14px; font-weight:700; color:#e2e8f0;">AlexGhost</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px; font-weight:500;">alex@ghostra.dev</div>
+                  <div style="margin-top:10px; display:inline-flex; align-items:center; gap:5px; padding:4px 12px; background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.12); border-radius:20px;">
+                    <div style="width:6px; height:6px; border-radius:50%; background:#8b5cf6; box-shadow:0 0 6px rgba(139,92,246,0.5);"></div>
+                    <span style="font-size:10px; color:#a78bfa; font-weight:600;">Premium</span>
+                  </div>
+                </div>
+
+                <!-- Subscription -->
+                <div class="card" style="padding:16px; margin-top:12px;">
+                  <div class="section-label" style="margin-bottom:10px;">Subscription</div>
+                  <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05)); border:1px solid rgba(139,92,246,0.15); display:flex; align-items:center; justify-content:center;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div>
+                      <div style="font-size:12px; font-weight:600; color:#e2e8f0;">Premium Plan</div>
+                      <div style="font-size:10px; color:#64748b; font-weight:500;">Renews Jan 15, 2025</div>
+                    </div>
+                  </div>
+                  <div style="height:4px; background:rgba(100,116,139,0.1); border-radius:2px; overflow:hidden; margin-bottom:10px;">
+                    <div style="width:72%; height:100%; background:linear-gradient(90deg, #7c3aed, #8b5cf6); border-radius:2px; box-shadow:0 0 8px rgba(139,92,246,0.3);"></div>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; font-size:10px; color:#475569; font-weight:500;">
+                    <span>22 days left</span>
+                    <span>72%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: data + actions -->
+              <div class="anim-in anim-d3" style="flex:1; display:flex; flex-direction:column; min-width:0;">
+                <!-- Data table -->
+                <div class="card" style="padding:0; overflow:hidden; margin-bottom:12px;">
+                  <div style="padding:14px 16px; border-bottom:1px solid rgba(139,92,246,0.06);">
+                    <div class="section-label">Account Details</div>
+                  </div>
+                  <table style="width:100%; border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid rgba(139,92,246,0.04);">
+                      <td style="padding:11px 16px; font-size:11px; color:#475569; font-weight:500; width:110px;">User ID</td>
+                      <td style="padding:11px 16px; font-size:11px; color:#94a3b8; font-family:monospace;">GR-78432-AB</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(139,92,246,0.04);">
+                      <td style="padding:11px 16px; font-size:11px; color:#475569; font-weight:500;">Role</td>
+                      <td style="padding:11px 16px; font-size:11px; color:#a78bfa; font-weight:600;">Premium Member</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(139,92,246,0.04);">
+                      <td style="padding:11px 16px; font-size:11px; color:#475569; font-weight:500;">Joined</td>
+                      <td style="padding:11px 16px; font-size:11px; color:#94a3b8;">March 12, 2023</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(139,92,246,0.04);">
+                      <td style="padding:11px 16px; font-size:11px; color:#475569; font-weight:500;">Playtime</td>
+                      <td style="padding:11px 16px; font-size:11px; color:#94a3b8;">342 hours</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(139,92,246,0.04);">
+                      <td style="padding:11px 16px; font-size:11px; color:#475569; font-weight:500;">Last Login</td>
+                      <td style="padding:11px 16px; font-size:11px; color:#94a3b8;">Today, 14:32 UTC</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:11px 16px; font-size:11px; color:#475569; font-weight:500;">2FA Status</td>
+                      <td style="padding:11px 16px;">
+                        <div style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.15); border-radius:20px;">
+                          <div style="width:5px; height:5px; border-radius:50%; background:#22c55e; box-shadow:0 0 4px rgba(34,197,94,0.4);"></div>
+                          <span style="font-size:10px; color:#22c55e; font-weight:600;">Enabled</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- Actions -->
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <button class="btn-secondary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="showToast('Password change requested','info')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Change Password
+                  </button>
+                  <button class="btn-secondary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="showToast('2FA settings opened','info')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Manage 2FA
+                  </button>
+                  <button class="btn-secondary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="showToast('Sessions cleared','success')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    Connected Apps
+                  </button>
+                  <button class="btn-danger" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="showToast('Account deletion requested','error')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Delete Account
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════ SETTINGS ════════════════════════════════════════ -->
+        <div id="page-settings" class="page">
+          <div style="flex:1; display:flex; flex-direction:column; padding:20px 24px 16px; overflow-y:auto;">
+            <div class="anim-in" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+              <div>
+                <h2 style="font-size:16px; font-weight:700; color:#e2e8f0;">Settings</h2>
+                <p style="font-size:11px; color:#475569; margin-top:2px;">Customize your launcher experience</p>
+              </div>
+              <div style="display:flex; gap:6px; background:rgba(20,24,36,0.6); border:1px solid rgba(139,92,246,0.08); border-radius:12px; padding:4px;">
+                <div class="tab-pill active" onclick="switchSettingTab(this,'general')">General</div>
+                <div class="tab-pill" onclick="switchSettingTab(this,'interface')">Interface</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:16px; flex:1; min-height:0;">
+              <!-- Settings content -->
+              <div class="anim-in anim-d2" style="flex:1; min-width:0; display:flex; flex-direction:column; gap:12px;">
+                <!-- Client Path -->
+                <div class="card" style="padding:16px;">
+                  <div class="section-label" style="margin-bottom:12px;">Client Path</div>
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" class="input-glass" style="flex:1; padding-left:14px;" value="C:\Ghostra\client\" readonly>
+                    <button class="btn-secondary" style="padding:0 16px; height:44px;" onclick="showToast('Browse dialog opened','info')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Nickname -->
+                <div class="card" style="padding:16px;">
+                  <div class="section-label" style="margin-bottom:12px;">In-Game Nickname</div>
+                  <input type="text" class="input-glass" style="padding-left:14px;" value="AlexGhost" id="nicknameInput" oninput="validateNickname(this)">
+                  <div id="nicknameHint" style="font-size:10px; color:#475569; margin-top:6px; font-weight:500;">3-16 characters, alphanumeric only</div>
+                </div>
+
+                <!-- RAM -->
+                <div class="card" style="padding:16px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <div class="section-label" style="margin:0;">Allocated RAM</div>
+                    <span id="ramValue" style="font-size:12px; font-weight:700; color:#8b5cf6; font-family:monospace;">4096 MB</span>
+                  </div>
+                  <div class="slider-track" id="ramTrack" onclick="handleRamClick(event)">
+                    <div class="slider-fill" id="ramFill" style="width:50%;">
+                      <div class="slider-thumb" id="ramThumb" onmousedown="startRamDrag(event)"></div>
+                    </div>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:10px; color:#475569; font-weight:500;">
+                    <span>1024 MB</span>
+                    <span>8192 MB</span>
+                  </div>
+                </div>
+
+                <!-- Resolution -->
+                <div class="card" style="padding:16px;">
+                  <div class="section-label" style="margin-bottom:12px;">Resolution</div>
+                  <div style="display:flex; gap:10px;">
+                    <div style="flex:1; position:relative;">
+                      <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:11px; color:#475569; font-weight:500;">W</span>
+                      <input type="text" class="input-glass" style="padding-left:28px; text-align:center;" value="1920">
+                    </div>
+                    <span style="display:flex; align-items:center; color:#475569; font-size:14px; font-weight:300;">&times;</span>
+                    <div style="flex:1; position:relative;">
+                      <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:11px; color:#475569; font-weight:500;">H</span>
+                      <input type="text" class="input-glass" style="padding-left:28px; text-align:center;" value="1080">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Toggles row -->
+                <div class="card" style="padding:16px;">
+                  <div class="section-label" style="margin-bottom:12px;">Options</div>
+                  <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <div>
+                        <div style="font-size:12px; font-weight:500; color:#e2e8f0;">Fullscreen</div>
+                        <div style="font-size:10px; color:#475569; font-weight:500; margin-top:1px;">Launch in fullscreen mode</div>
+                      </div>
+                      <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+                    </div>
+                    <div style="height:1px; background:rgba(139,92,246,0.06);"></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <div>
+                        <div style="font-size:12px; font-weight:500; color:#e2e8f0;">Auto-Update</div>
+                        <div style="font-size:10px; color:#475569; font-weight:500; margin-top:1px;">Keep client up to date</div>
+                      </div>
+                      <div class="toggle on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+                    </div>
+                    <div style="height:1px; background:rgba(139,92,246,0.06);"></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <div>
+                        <div style="font-size:12px; font-weight:500; color:#e2e8f0;">Discord RPC</div>
+                        <div style="font-size:10px; color:#475569; font-weight:500; margin-top:1px;">Show status in Discord</div>
+                      </div>
+                      <div class="toggle" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Theme + Language -->
+                <div style="display:flex; gap:12px;">
+                  <div class="card" style="flex:1; padding:16px;">
+                    <div class="section-label" style="margin-bottom:10px;">Theme</div>
+                    <div class="dropdown" id="themeDropdown">
+                      <div style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; background:rgba(20,24,36,0.6); border:1px solid rgba(139,92,246,0.12); border-radius:10px; cursor:pointer; font-size:12px; color:#e2e8f0; font-weight:500;" onclick="toggleDropdown('themeDropdown')">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                          Dark Glass
+                        </span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                      <div class="dropdown-menu">
+                        <div class="dropdown-item selected" onclick="selectDropdown('themeDropdown',this,'Dark Glass')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2"/></svg>
+                          Dark Glass
+                        </div>
+                        <div class="dropdown-item" onclick="selectDropdown('themeDropdown',this,'Midnight')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><circle cx="12" cy="12" r="5"/></svg>
+                          Midnight
+                        </div>
+                        <div class="dropdown-item" onclick="selectDropdown('themeDropdown',this,'Amethyst')">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><circle cx="12" cy="12" r="5"/></svg>
+                          Amethyst
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card" style="flex:1; padding:16px;">
+                    <div class="section-label" style="margin-bottom:10px;">Language</div>
+                    <div class="dropdown" id="langDropdown">
+                      <div style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; background:rgba(20,24,36,0.6); border:1px solid rgba(139,92,246,0.12); border-radius:10px; cursor:pointer; font-size:12px; color:#e2e8f0; font-weight:500;" onclick="toggleDropdown('langDropdown')">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                          <span class="flag">&#127479;&#127482;</span>
+                          Russian
+                        </span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                      <div class="dropdown-menu">
+                        <div class="dropdown-item selected" onclick="selectDropdown('langDropdown',this,'Russian','&#127479;&#127482;')"><span class="flag">&#127479;&#127482;</span> Russian</div>
+                        <div class="dropdown-item" onclick="selectDropdown('langDropdown',this,'English','&#127468;&#127463;')"><span class="flag">&#127468;&#127463;</span> English</div>
+                        <div class="dropdown-item" onclick="selectDropdown('langDropdown',this,'Polski','&#127477;&#127473;')"><span class="flag">&#127477;&#127473;</span> Polski</div>
+                        <div class="dropdown-item" onclick="selectDropdown('langDropdown',this,'Українська','&#127482;&#127462;')"><span class="flag">&#127482;&#127462;</span> Українська</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Design System Sheet -->
+              <div class="anim-in anim-d3" style="width:240px; flex-shrink:0;">
+                <div class="card" style="padding:16px; height:100%; overflow-y:auto;">
+                  <div class="section-label" style="margin-bottom:14px;">Design System</div>
+
+                  <!-- Palette -->
+                  <div style="margin-bottom:16px;">
+                    <div style="font-size:10px; font-weight:600; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Palette</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                      <div style="width:28px; height:28px; border-radius:8px; background:#0a0e1a; border:1px solid rgba(139,92,246,0.1);" title="#0a0e1a"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#141824; border:1px solid rgba(139,92,246,0.1);" title="#141824"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#8b5cf6; border:1px solid rgba(139,92,246,0.2);" title="#8b5cf6"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#7c3aed; border:1px solid rgba(124,58,237,0.2);" title="#7c3aed"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#a78bfa; border:1px solid rgba(167,139,250,0.2);" title="#a78bfa"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#22c55e; border:1px solid rgba(34,197,94,0.2);" title="#22c55e"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#ef4444; border:1px solid rgba(239,68,68,0.2);" title="#ef4444"></div>
+                      <div style="width:28px; height:28px; border-radius:8px; background:#f59e0b; border:1px solid rgba(245,158,11,0.2);" title="#f59e0b"></div>
+                    </div>
+                  </div>
+
+                  <!-- Spacing -->
+                  <div style="margin-bottom:16px;">
+                    <div style="font-size:10px; font-weight:600; color:#475569; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Spacing</div>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                      <div style="display:flex; align-items:center; gap:8px;"><div style="width:16px; height:16px; border-radius:4px; background:rgba(139,92,246,0.15);"></div><span style="font-size:11px; color:#64748b; font-weight:500;">16px — Small</span></div>
+                      <div style="display:flex; align-items:center; gap:8px;"><div style="width:24px; height:24px; border-radius:4px; background:rgba(139,92,246,0.15);"></div><span style="font-size:11px; color:#64748b; font-weight:500;">24px — Medium</span></div>
+                      <div style="display:flex; align-items:center; gap:8px;"><div style="width:32px; height:32px; border-radius:4px; background:rgba(139,92,246,0.15);"></div><span style="font-size:11px; color:#64748b; font-weight:500;">32px — Large</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Component States -->
+                  <div>
+                    <div style="font-size:10px; font-weight:600; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">States</div>
+                    <div style="display:flex; flex-direction:column; gap:7px;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:52px; height:26px; border-radius:8px; state-normal" class="state-normal" style="display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600;">Normal</div>
+                        <span style="font-size:10px; color:#475569; font-weight:500;">Default</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:52px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600;" class="state-hover">Hover</div>
+                        <span style="font-size:10px; color:#475569; font-weight:500;">Mouse over</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:52px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600;" class="state-active">Active</div>
+                        <span style="font-size:10px; color:#475569; font-weight:500;">Pressed</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:52px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600;" class="state-focused">Focus</div>
+                        <span style="font-size:10px; color:#475569; font-weight:500;">Keyboard focus</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:52px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600;" class="state-disabled">Disabled</div>
+                        <span style="font-size:10px; color:#475569; font-weight:500;">Unavailable</span>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:52px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600;" class="state-loading">Loading</div>
+                        <span style="font-size:10px; color:#475569; font-weight:500;">In progress</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── State ──
+    let currentPage = 'login';
+    let isLoggedIn = false;
+    let ramValue = 4096;
+    let ramDragging = false;
+
+    // ── Page navigation ──
+    function goPage(page) {
+      if (page !== 'login' && !isLoggedIn) {
+        showToast('Please sign in first','error');
+        goPage('login');
+        return;
+      }
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelector('.nav-item[data-page="' + page + '"]')?.classList.add('active');
+      const titles = {login:'Sign In', home:'Home', profile:'Profile', settings:'Settings'};
+      document.getElementById('pageTitle').textContent = titles[page] || page;
+      currentPage = page;
+
+      // Re-trigger animations
+      const activePage = document.getElementById('page-' + page);
+      activePage.querySelectorAll('.anim-in').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
+      });
+    }
+
+    // ── Login ──
+    function doLogin() {
+      const btn = document.getElementById('loginBtn');
+      const txt = document.getElementById('loginBtnText');
+      const user = document.getElementById('loginUser');
+      const pass = document.getElementById('loginPass');
+
+      user.classList.remove('error','success');
+      pass.classList.remove('error','success');
+
+      if (!user.value.trim()) { user.classList.add('error'); showToast('Enter username','error'); return; }
+      if (!pass.value.trim()) { pass.classList.add('error'); showToast('Enter password','error'); return; }
+
+      btn.classList.add('loading');
+      txt.style.opacity = '0';
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        txt.style.opacity = '1';
+        user.classList.add('success');
+        pass.classList.add('success');
+        isLoggedIn = true;
+        showToast('Welcome back, AlexGhost!','success');
+        setTimeout(() => goPage('home'), 400);
+      }, 1200);
+    }
+
+    function togglePass() {
+      const input = document.getElementById('loginPass');
+      const icon = document.getElementById('eyeIcon');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.innerHTML = input.type === 'password'
+        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    }
+
+    function toggleCheckbox(el) {
+      const cb = el.querySelector('.cb');
+      cb.classList.toggle('checked');
+    }
+
+    // ── Toast ──
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast toast-' + type + ' show';
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── Toggles ──
+    function toggleSwitch(el) {
+      el.classList.toggle('on');
+    }
+
+    // ── Dropdowns ──
+    function toggleDropdown(id) {
+      document.querySelectorAll('.dropdown').forEach(d => { if (d.id !== id) d.classList.remove('open'); });
+      document.getElementById(id).classList.toggle('open');
+    }
+    function selectDropdown(id, item, text, flag) {
+      const dd = document.getElementById(id);
+      const btn = dd.querySelector('div[style*="cursor:pointer"]');
+      const span = btn.querySelector('span');
+      if (flag) {
+        span.innerHTML = '<span class="flag">' + flag + '</span> ' + text;
+      } else {
+        const svg = item.querySelector('svg').outerHTML;
+        span.innerHTML = svg + ' ' + text;
+      }
+      dd.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+      item.classList.add('selected');
+      dd.classList.remove('open');
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+      }
+    });
+
+    // ── RAM Slider ──
+    function updateRam(percent) {
+      percent = Math.max(0, Math.min(1, percent));
+      ramValue = Math.round(1024 + percent * (8192 - 1024));
+      document.getElementById('ramFill').style.width = (percent * 100) + '%';
+      document.getElementById('ramValue').textContent = ramValue + ' MB';
+    }
+    function handleRamClick(e) {
+      const rect = document.getElementById('ramTrack').getBoundingClientRect();
+      updateRam((e.clientX - rect.left) / rect.width);
+    }
+    function startRamDrag(e) {
+      e.preventDefault();
+      ramDragging = true;
+      document.addEventListener('mousemove', onRamDrag);
+      document.addEventListener('mouseup', stopRamDrag);
+    }
+    function onRamDrag(e) {
+      if (!ramDragging) return;
+      const rect = document.getElementById('ramTrack').getBoundingClientRect();
+      updateRam((e.clientX - rect.left) / rect.width);
+    }
+    function stopRamDrag() {
+      ramDragging = false;
+      document.removeEventListener('mousemove', onRamDrag);
+      document.removeEventListener('mouseup', stopRamDrag);
+    }
+
+    // ── Nickname validation ──
+    function validateNickname(input) {
+      const hint = document.getElementById('nicknameHint');
+      const val = input.value;
+      if (val.length < 3) { hint.textContent = 'Too short (min 3 chars)'; hint.style.color = '#ef4444'; input.classList.add('error'); }
+      else if (val.length > 16) { hint.textContent = 'Too long (max 16 chars)'; hint.style.color = '#ef4444'; input.classList.add('error'); }
+      else if (!/^[a-zA-Z0-9_]+$/.test(val)) { hint.textContent = 'Use letters, numbers, underscores only'; hint.style.color = '#ef4444'; input.classList.add('error'); }
+      else { hint.textContent = 'Valid nickname'; hint.style.color = '#22c55e'; input.classList.remove('error'); input.classList.add('success'); }
+    }
+
+    // ── Avatar upload ──
+    function handleAvatarDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length) previewAvatar(files[0]);
+    }
+    function handleAvatarSelect(e) {
+      if (e.target.files.length) previewAvatar(e.target.files[0]);
+    }
+    function previewAvatar(file) {
+      if (!file.type.startsWith('image/')) { showToast('Please upload an image','error'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('avatarPreview').innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">';
+        showToast('Avatar updated','success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Settings tabs ──
+    function switchSettingTab(el, tab) {
+      el.parentElement.querySelectorAll('.tab-pill').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    // ── Ripple effect on buttons ──
+    document.querySelectorAll('.btn-primary, .btn-secondary, .btn-danger').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+        this.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+      });
+    });
+
+    // ── Init ──
+    goPage('login');
+  </script>
+</body>
+</html>

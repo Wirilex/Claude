@@ -1,0 +1,329 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghostra Visual - Launcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .glass-panel {
+            background: rgba(23, 23, 30, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.6),
+                0 0 120px rgba(139, 92, 246, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .glow-effect {
+            filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.7)) drop-shadow(0 0 24px rgba(124, 58, 237, 0.4));
+        }
+        
+        .text-glow {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        
+        .status-transition {
+            animation: slideUpFade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .bg-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+        
+        .gradient-mask {
+            background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="bg-black flex items-center justify-center min-h-screen overflow-hidden relative">
+    <!-- Ambient Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-gray-950 via-slate-900 to-black"></div>
+    <div class="absolute inset-0 bg-noise opacity-40"></div>
+    
+    <!-- Purple Accent Lighting -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600 rounded-full blur-[150px] opacity-20 pointer-events-none animate-pulse"></div>
+    <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-purple-950/30 to-transparent pointer-events-none"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-violet-600 rounded-full blur-[130px] opacity-10 pointer-events-none"></div>
+    
+    <!-- Main Launcher Window -->
+    <div class="relative w-[850px] h-[550px] glass-panel rounded-3xl flex flex-col items-center justify-center p-12 overflow-hidden">
+        <!-- Subtle inner gradient -->
+        <div class="absolute inset-0 gradient-mask pointer-events-none"></div>
+        
+        <!-- Header -->
+        <div class="absolute top-10 left-10 flex items-center gap-4 z-10">
+            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-700 rounded-xl shadow-lg shadow-purple-500/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-xl tracking-tight">Ghostra Visual</h1>
+                <p class="text-purple-400/80 text-xs font-medium uppercase tracking-wider">Launcher</p>
+            </div>
+        </div>
+        
+        <div class="absolute top-10 right-10 z-10">
+            <span class="text-gray-500 text-sm font-mono">v2.4.0-beta</span>
+        </div>
+        
+        <!-- Center Content -->
+        <div class="flex flex-col items-center justify-center flex-1 w-full max-w-lg z-10 mt-8">
+            
+            <!-- Donut Progress -->
+            <div class="relative w-56 h-56 mb-10 group">
+                <!-- Outer glow -->
+                <div class="absolute inset-0 rounded-full bg-purple-500/20 blur-2xl group-hover:bg-purple-500/30 transition-all duration-500"></div>
+                
+                <svg class="w-full h-full glow-effect" viewBox="0 0 140 140">
+                    <defs>
+                        <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#c084fc" />
+                            <stop offset="50%" stop-color="#a855f7" />
+                            <stop offset="100%" stop-color="#7c3aed" />
+                        </linearGradient>
+                        
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Background track -->
+                    <circle 
+                        cx="70" 
+                        cy="70" 
+                        r="58" 
+                        fill="none" 
+                        stroke="rgba(255,255,255,0.03)" 
+                        stroke-width="10"
+                    />
+                    
+                    <!-- Secondary subtle track -->
+                    <circle 
+                        cx="70" 
+                        cy="70" 
+                        r="58" 
+                        fill="none" 
+                        stroke="rgba(139,92,246,0.1)" 
+                        stroke-width="10"
+                        stroke-dasharray="4 4"
+                    />
+                    
+                    <!-- Progress arc -->
+                    <circle 
+                        id="progress-circle"
+                        cx="70" 
+                        cy="70" 
+                        r="58" 
+                        fill="none" 
+                        stroke="url(#purpleGradient)" 
+                        stroke-width="10"
+                        stroke-linecap="round"
+                        class="progress-ring-circle"
+                        filter="url(#glow)"
+                    />
+                </svg>
+                
+                <!-- Center percentage -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="percentage-text" class="text-5xl font-bold text-white text-glow tracking-tighter tabular-nums">0%</span>
+                </div>
+            </div>
+            
+            <!-- Status Information -->
+            <div class="text-center space-y-3 w-full">
+                <h2 id="main-status" class="text-2xl font-semibold text-white status-transition h-8">Initializing...</h2>
+                <p id="sub-status" class="text-sm text-gray-400 font-medium h-5">Preparing installation environment</p>
+            </div>
+            
+        </div>
+        
+        <!-- Bottom Section -->
+        <div class="w-full mt-auto z-10 space-y-4">
+            <!-- Divider -->
+            <div class="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+            
+            <!-- File Details -->
+            <div class="flex justify-between items-end">
+                <div class="space-y-1">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Current File</p>
+                    <p id="filename-text" class="text-sm text-gray-300 font-mono truncate max-w-[300px]">ghostra-visual-core.pkg</p>
+                </div>
+                
+                <div class="text-right space-y-1">
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Progress</p>
+                    <p id="size-text" class="text-sm text-gray-300 font-mono tabular-nums">0 MB / 248 MB</p>
+                </div>
+            </div>
+            
+            <!-- Linear Progress Bar -->
+            <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden relative">
+                <div id="linear-progress" class="h-full bg-gradient-to-r from-purple-400 via-violet-500 to-purple-600 rounded-full transition-all duration-300 ease-out w-0 relative">
+                    <div class="absolute inset-0 bg-white/20 w-full h-full animate-shimmer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+            animation: shimmer 2s infinite;
+        }
+    </style>
+    
+    <script>
+        const circle = document.getElementById('progress-circle');
+        const percentageText = document.getElementById('percentage-text');
+        const mainStatus = document.getElementById('main-status');
+        const subStatus = document.getElementById('sub-status');
+        const filenameText = document.getElementById('filename-text');
+        const sizeText = document.getElementById('size-text');
+        const linearProgress = document.getElementById('linear-progress');
+        
+        const radius = 58;
+        const circumference = 2 * Math.PI * radius;
+        
+        // Initialize circle
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = circumference;
+        
+        const downloadStates = [
+            { threshold: 0, main: 'Initializing...', sub: 'Preparing installation environment', file: 'config.manifest' },
+            { threshold: 10, main: 'Downloading assets...', sub: 'Fetching core visual libraries', file: 'core-assets-v2.4.zip' },
+            { threshold: 35, main: 'Downloading assets...', sub: 'Retrieving shader caches', file: 'shaders-hd.pack' },
+            { threshold: 55, main: 'Installing libraries...', sub: 'Extracting dependencies', file: 'deps-runtime.exe' },
+            { threshold: 75, main: 'Verifying files...', sub: 'Checking package integrity', file: 'verify-checksum.sha' },
+            { threshold: 90, main: 'Finalizing...', sub: 'Applying configuration settings', file: 'settings.json' },
+            { threshold: 100, main: 'Launching...', sub: 'Starting Ghostra Visual', file: 'ghostra.exe' }
+        ];
+        
+        const files = [
+            'ghostra-visual-core.pkg',
+            'renderer-dx12.dll',
+            'assets-textures.pak',
+            'shaders-vulkan.bin',
+            'config-default.json',
+            'launcher-update.exe'
+        ];
+        
+        let currentProgress = 0;
+        const totalSizeMB = 248;
+        
+        function updateProgress(percent) {
+            // Update circular progress
+            const offset = circumference - (percent / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            // Update percentage text with counting effect
+            percentageText.textContent = `${Math.floor(percent)}%`;
+            
+            // Update linear progress
+            linearProgress.style.width = `${percent}%`;
+            
+            // Update size text
+            const currentMB = ((percent / 100) * totalSizeMB).toFixed(0);
+            sizeText.textContent = `${currentMB} MB / ${totalSizeMB} MB`;
+            
+            // Update status texts based on threshold
+            for (let i = downloadStates.length - 1; i >= 0; i--) {
+                if (percent >= downloadStates[i].threshold) {
+                    if (mainStatus.textContent !== downloadStates[i].main) {
+                        mainStatus.textContent = downloadStates[i].main;
+                        subStatus.textContent = downloadStates[i].sub;
+                        filenameText.textContent = downloadStates[i].file;
+                        
+                        // Trigger animation
+                        mainStatus.classList.remove('status-transition');
+                        void mainStatus.offsetWidth;
+                        mainStatus.classList.add('status-transition');
+                    }
+                    break;
+                }
+            }
+            
+            // Randomly change filename occasionally during download phase
+            if (percent > 10 && percent < 80 && Math.random() > 0.95) {
+                const randomFile = files[Math.floor(Math.random() * files.length)];
+                filenameText.textContent = randomFile;
+            }
+        }
+        
+        // Simulate realistic download progress
+        function simulateDownload() {
+            let speed = 0.8;
+            
+            const interval = setInterval(() => {
+                // Variable speed to simulate real network conditions
+                if (currentProgress < 30) {
+                    speed = Math.random() * 1.2 + 0.4;
+                } else if (currentProgress < 70) {
+                    speed = Math.random() * 0.8 + 0.2;
+                } else if (currentProgress < 90) {
+                    speed = Math.random() * 1.5 + 0.5;
+                } else {
+                    speed = 0.4;
+                }
+                
+                currentProgress += speed;
+                
+                if (currentProgress >= 100) {
+                    currentProgress = 100;
+                    updateProgress(currentProgress);
+                    clearInterval(interval);
+                    
+                    // Hold at 100% then restart for demo
+                    setTimeout(() => {
+                        currentProgress = 0;
+                        simulateDownload();
+                    }, 3000);
+                } else {
+                    updateProgress(currentProgress);
+                }
+            }, 80);
+        }
+        
+        // Start simulation after brief delay
+        setTimeout(simulateDownload, 800);
+    </script>
+</body>
+</html>
